@@ -1,0 +1,15 @@
+diff --git a/format/private/format.sh b/format/private/format.sh
+index e54d1d2..28aa653 100755
+--- a/format/private/format.sh
++++ b/format/private/format.sh
+@@ -127,7 +127,9 @@ function ls-files {
+     fi
+
+     if [[ $disable_git_attribute_checks == true ]]; then
+-      echo $files
++      for file in $files; do
++        echo $file
++      done
+       return
+     fi
+
