@@ -1,0 +1,31 @@
+load("@aspect_rules_lint//format:defs.bzl", "format_multirun")
+
+format_multirun(
+    name = "format",
+    java = ":java-format",
+    python = ":ruff",
+)
+
+
+java_binary(
+    name = "java-format",
+    jvm_flags = [
+        "--add-exports jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED",
+        "--add-exports jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED",
+        "--add-exports jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED",
+        "--add-exports jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED",
+        "--add-exports jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED",
+    ],
+    main_class = "com.google.googlejavaformat.java.Main",
+    runtime_deps = ["@google-java-format//jar"],
+)
+
+alias(
+    name = "ruff",
+    actual = select({
+        "@bazel_tools//src/conditions:linux_x86_64": "@ruff_x86_64-unknown-linux-gnu//:ruff",
+        "@bazel_tools//src/conditions:linux_aarch64": "@ruff_aarch64-unknown-linux-gnu//:ruff",
+        "@bazel_tools//src/conditions:darwin_arm64": "@ruff_aarch64-apple-darwin//:ruff",
+        "@bazel_tools//src/conditions:darwin_x86_64": "@ruff_x86_64-apple-darwin//:ruff",
+    }),
+)
