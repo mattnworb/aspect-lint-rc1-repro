@@ -1,3 +1,10 @@
 bazel_dep(name = "aspect_rules_lint", version = "1.0.0-rc1")
 
-single_version_override(module_name = "aspect_rules_lint", patches = ["//:aspect_rules_lint_gitattibute.patch"], patch_strip = 1,)
+single_version_override(
+    module_name = "aspect_rules_lint",
+    patches = [
+        "//:aspect_rules_lint_gitattibute.patch",
+        "//:aspect_rules_lint_attr.patch",
+    ],
+    patch_strip = 1,
+)

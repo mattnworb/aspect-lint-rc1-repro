@@ -1,0 +1,55 @@
+diff --git a/format/defs.bzl b/format/defs.bzl
+index fbe6b20..cb24d57 100644
+--- a/format/defs.bzl
++++ b/format/defs.bzl
+@@ -45,10 +45,14 @@
+ load("@rules_multirun//:defs.bzl", "command", "multirun")
+ load("//format/private:formatter_binary.bzl", "BUILTIN_TOOL_LABELS", "CHECK_FLAGS", "FIX_FLAGS", "TOOLS", "to_attribute_name")
+
+-def _format_attr_factory(target_name, lang, toolname, tool_label, mode):
++def _format_attr_factory(target_name, lang, toolname, tool_label, mode, disable_git_attribute_checks):
+     if mode not in ["check", "fix", "test"]:
+         fail("Invalid mode", mode)
+
++    args = []
++    if disable_git_attribute_checks:
++        args.append("--disable_git_attribute_checks")
++
+     return {
+         "name": target_name + (".check" if mode in "check" else ""),
+         ("env" if mode == "test" else "environment"): {
+@@ -61,13 +65,14 @@
+             "mode": "check" if mode == "test" else mode,
+         },
+         "data": [tool_label],
++        "arguments": args,
+     }
+
+ languages = rule(
+@@ -89,7 +94,7 @@
+     },
+ )
+
+-def format_multirun(name, jobs = 4, print_command = False, **kwargs):
++def format_multirun(name, jobs = 4, print_command = False, disable_git_attribute_checks = False, **kwargs):
+     """Create a [multirun] binary for the given languages.
+
+     Intended to be used with `bazel run` to update source files in-place.
+@@ -106,6 +111,8 @@
+         jobs: how many language formatters to spawn in parallel, ideally matching how many CPUs are available
+         print_command: whether to print a progress message before calling the formatter of each language.
+             Note that a line is printed for a formatter even if no files of that language are to be formatted.
++        disable_git_attribute_checks: set to True to disable the checking of each file's git attributes to check
++            if it should be excluding from formatting. This check can be slow for large codebases.
+         **kwargs: attributes named for each language; see [languages](#languages)
+     """
+     commands = []
+@@ -119,7 +126,7 @@
+             command(
+                 command = Label("@aspect_rules_lint//format/private:format"),
+                 description = "Formatting {} with {}...".format(lang, toolname),
+-                **_format_attr_factory(target_name, lang, toolname, tool_label, mode)
++                **_format_attr_factory(target_name, lang, toolname, tool_label, mode, disable_git_attribute_checks)
+             )
+         commands.append(target_name)
+

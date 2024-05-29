@@ -2,10 +2,10 @@ load("@aspect_rules_lint//format:defs.bzl", "format_multirun")
 
 format_multirun(
     name = "format",
+    disable_git_attribute_checks = True,
     java = ":java-format",
     python = ":ruff",
 )
-
 
 java_binary(
     name = "java-format",
